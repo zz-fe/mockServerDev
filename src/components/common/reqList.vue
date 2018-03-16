@@ -38,10 +38,11 @@
                 <Col span="4" class='ml10'>
                     <Input type="text" v-model="item.desc" placeholder="备注"></Input>
                 </Col>
-                <Col span="1" class='ml10' v-if = 'index != 0 '>
-                <Button type="error" small @click="handleReqRemove(index)" icon="trash-a"></Button>
+                <Col span="1" class='ml10' >
+                    <Button type="success" small @click="handleReqAdd" v-if = 'index == 0 ' icon="plus-round" ></Button>
+                    <Button type="error" small @click="handleReqRemove(index)" v-if = 'index != 0' icon="trash-a"></Button>
                 </Col>
-                     <!--弹窗!--> 
+                <!--弹窗!--> 
                 <Modal
                     v-model="form.madal"
                     :title="form.title"
@@ -52,36 +53,23 @@
                 </Modal>
              </Row>
         </Row>
-       
-        <Col span="20">
-            <Button  size="large" @click="handleReqAdd">增加</Button>
-        </Col>
     </div>
 </template>
 <script>
 import types from '@/request/type'
+import isMust from '@/request/isMust'
 export default {
        name:"reqList",
        props:['data'] ,
        data(){
         return{
             types:types,
-            isMust:[
-                {
-                    "label":"必须",
-                    "valueMust":"必须"
-                },
-                {
-                    "label":"不必须",
-                    "valueMust":"不必须"
-                },
-            ],
+            isMust:isMust,
             form:{
                 madal : false,
                 title : '',
                 data : ''
             }
-        
         }
        },
        methods:{
@@ -97,7 +85,7 @@ export default {
             })
         },
         handleReqRemove(index){
-            this.data.request.splice(index,1)
+            this.data.splice(index,1)
         },
         ok(item) {
             item.value = this.form.data
@@ -108,11 +96,13 @@ export default {
         },
         handleChane(item){
              if(item.typeValue == 'Number' || 'String' || 'Boolean') item.value = '' 
+             if(item.typeValue == 'Object') item.value = []
         },
         handleReq(index,item){
             this.form.madal = true 
-            this.form.title = item.key
-            this.form.data = item.value || [{
+            this.form.title = item.key 
+            if(item.value == null || {}){
+                this.form.data = [{
                 key:'',
                 typeValue:"String",
                 content:'',
@@ -120,9 +110,18 @@ export default {
                 desc:'',
                 value:null,
                 modal:false,
-            }]
+             }]
+            }else{
+                this.form.data = item.value
+            }
+            
          },
     },
        
 }
 </script>
+<style>
+    .mt20{
+        margin-top:20px;
+    }
+</style>

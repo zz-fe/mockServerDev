@@ -5,10 +5,10 @@
              <apiList :doc='doc'></apiList>
         </TabPane>
         <TabPane label="请求参数" icon="social-windows">
-           <request :doc='doc'></request>
+           <request :data='doc.request'></request>
         </TabPane>
         <TabPane label="响应结果" icon="social-tux">
-            <response :doc='doc'></response>
+           <request :doc='doc.response'></request>
         </TabPane>
     </Tabs>
 
@@ -18,7 +18,6 @@
 <script>
 import apiList from './apiList'
 import request from './request'
-import response from './response'
 import { getPersonApiList } from '@/server/personApi'
 export default {
   data(){
@@ -28,7 +27,6 @@ export default {
   },
   components:{
     request,
-    response,
     apiList
   },
   watch: {
