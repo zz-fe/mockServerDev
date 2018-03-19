@@ -42,7 +42,8 @@
                     </Col>
                      <Col span="2" class='ml10'>
                          <Input type="text" v-model="item.value" placeholder="默认值" 
-                          v-if = "item.typeValue == 'Number' ||  item.typeValue == 'Boolean' || item.typeValue == 'String'"
+                          v-if = "item.typeValue == 'Number' ||  item.typeValue == 'Boolean' || item.typeValue == 'String' || item.typeValue == 'Array[String]' || 
+                           item.typeValue == 'Array[Number]' "
                          ></Input>
                          <span class='req-btn' @click="handleReq(index,item)" 
                           v-else
@@ -74,15 +75,16 @@
                
             <Row>
                   <Col span="20">
-                    <editor v-model="editorContent" @init="editorInit();"  lang="html" height="150"  theme="chrome" id='editor'></editor>
+                    <vue-json-editor v-model="editorContent" :showBtns="false"  @json-change="onJsonChange"></vue-json-editor>
                   </Col>
             </Row>  
+           
             <!--编辑器!--> 
              </div>
              <div class="" v-show="pattern == 'jsonEdit' ">
                 <Row >
                   <Col span="20">
-                    <editor v-model="editorContent" @init="editorInit();"  lang="html" height="150"  theme="chrome" id='editor'></editor>
+                  <vue-json-editor v-model="editorContent" :showBtns="false" @json-change="onJsonChange"></vue-json-editor>
                   </Col>
                 </Row>
              </div>
@@ -95,29 +97,33 @@
 import types from '@/request/type'
 import isMust from '@/request/isMust'
 import reqList from '@/components/common/reqList'
+import vueJsonEditor from 'vue-json-editor'
 export default {
   props:['data'],
   components: {
     reqList,
-    editor:require('vue2-ace-editor')
+    vueJsonEditor
   },
   data(){
     return{
       pattern: 'edit',
       types:types,
       isMust:isMust,
-      editorContent:'',
+      editorContent:null,
       form:{
         madal : false,
         title : '',
         data : ''
-      }
+      },
     }
   },
   mounted(){
     
   },
   methods:{
+    onJsonChange (value) {
+        console.log('value:', value)
+      },
     handleReqAdd(){
       this.data.push({
         key:'',
@@ -138,19 +144,14 @@ export default {
      */
     handleShow(){
       let res = this.reducer(this.data)
-      console.log(res)
-      this.editorContent = this.formatJson(res)
+        this.editorContent = res
     },
     reducer(data,parentKey = {}){
       data.forEach((item)=>{
           let target = item.key 
           if(item.typeValue == 'Object' && target){
-              if(item.value.length == 0) {
-                   parentKey[target] = {}
-              }else{
-                  parentKey[target] = {}
-                  this.reducer(item.value,parentKey[target])
-              }
+            parentKey[target] = {}
+            if(item.value.length != 0) this.reducer(item.value,parentKey[target])
           }
           if(item.typeValue == 'String' && target){
               parentKey[target] = item.value || ''
@@ -185,92 +186,11 @@ export default {
     ok (item) {
         item.value = this.form.data
         console.log(item.value)
-        this.$Message.info('Clicked ok');
+        this.$Message.info('创建成功');
     },
     cancel () {
         this.form.madal = false
-        this.$Message.info('Clicked cancel');
-    },
-    editorInit(){
-      require('vue2-ace-editor/node_modules/brace/mode/html');
-      require('vue2-ace-editor/node_modules/brace/mode/json');
-      require('vue2-ace-editor/node_modules/brace/mode/groovy');
-      require('vue2-ace-editor/node_modules/brace/theme/chrome');
-    },
-    formatJson(json, options){
-          var reg = null,
-          formatted = '',
-          pad = 0,
-          PADDING = '';
-          options = options || {};
-          options.newlineAfterColonIfBeforeBraceOrBracket = (options.newlineAfterColonIfBeforeBraceOrBracket === true) ? true : false;
-
-          options.spaceAfterColon = (options.spaceAfterColon === false) ? false : true;
-
-
-          if (typeof json !== 'string') {
-
-          json = JSON.stringify(json);
-          } else {
-
-          json = JSON.parse(json);
-          json = JSON.stringify(json);
-          }
-
-          reg = /([\{\}])/g;
-          json = json.replace(reg, '\r\n$1\r\n');
-
-
-          reg = /([\[\]])/g;
-          json = json.replace(reg, '\r\n$1\r\n');
-
-
-          reg = /(\,)/g;
-          json = json.replace(reg, '$1\r\n');
-
-
-          reg = /(\r\n\r\n)/g;
-          json = json.replace(reg, '\r\n');
-
-
-          reg = /\r\n\,/g;
-          json = json.replace(reg, ',');
-
-
-          if (!options.newlineAfterColonIfBeforeBraceOrBracket){
-          reg = /\:\r\n\{/g;
-          json = json.replace(reg, ':{');
-          reg = /\:\r\n\[/g;
-          json = json.replace(reg, ':[');
-          }
-          if (options.spaceAfterColon) {
-          reg = /\:/g;
-          json = json.replace(reg, ': ');
-          }
-          json.split('\r\n').forEach(function( node,index){
-            var i = 0,
-            indent = 0,
-            padding = '';
-            if (node.match(/\{$/) || node.match(/\[$/)) {
-            indent = 1;
-            } else if (node.match(/\}/) || node.match(/\]/)) {
-            if (pad !== 0) {
-              pad -= 1;
-            }
-            } else {
-            indent = 0;
-            }
-
-            for (i = 0; i < pad; i++) {
-            padding += PADDING;
-            }
-
-            formatted += padding + node + '\r\n';
-            pad += indent;
-
-          })
-
-          return formatted;
+        this.$Message.info('取消操作');
     }
   }
 }

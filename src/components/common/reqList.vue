@@ -89,10 +89,10 @@ export default {
         },
         ok(item) {
             item.value = this.form.data
-            this.$Message.info('Clicked ok');
+            this.$Message.info('创建成功');
         },
         cancel () {
-            this.$Message.info('Clicked cancel');
+            this.$Message.info('取消操作');
         },
         handleChane(item){
              if(item.typeValue == 'Number' || 'String' || 'Boolean') item.value = '' 

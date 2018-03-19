@@ -23,4 +23,8 @@ export default [
     label : 'Array[String]',
     typeValue : 'Array[String]'
   },
+  {
+    label : 'Array[Number]',
+    typeValue : 'Array[Number]'
+  },
 ]
