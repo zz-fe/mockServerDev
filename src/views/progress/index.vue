@@ -1,7 +1,7 @@
 <template lang="html">
-    <div class="">
-      list@你
-    </div>
+  <div class="">
+    peo
+  </div>
 </template>
 
 <script>

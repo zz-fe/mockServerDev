@@ -4,12 +4,12 @@
           <Col span="24">
              <div class="api-head">
                <RadioGroup v-model="pattern">
-                 <Radio label="edit"> 
+                 <Radio label="edit">
                      <span>输入模式</span>
                  </Radio>
                  <Radio label="jsonEdit">
                      <span>编辑器模式</span>
-                 </Radio> 
+                 </Radio>
              </RadioGroup>
              </div>
              <div class="" v-show="pattern == 'edit' ">
@@ -41,11 +41,11 @@
                       </Select>
                     </Col>
                      <Col span="2" class='ml10'>
-                         <Input type="text" v-model="item.value" placeholder="默认值" 
-                          v-if = "item.typeValue == 'Number' ||  item.typeValue == 'Boolean' || item.typeValue == 'String' || item.typeValue == 'Array[String]' || 
+                         <Input type="text" v-model="item.value" placeholder="默认值"
+                          v-if = "item.typeValue == 'Number' ||  item.typeValue == 'Boolean' || item.typeValue == 'String' || item.typeValue == 'Array[String]' ||
                            item.typeValue == 'Array[Number]' "
                          ></Input>
-                         <span class='req-btn' @click="handleReq(index,item)" 
+                         <span class='req-btn' @click="handleReq(index,item)"
                           v-else
                          >. . .</span>
                     </Col>
@@ -55,7 +55,7 @@
                     <Col span="1" class='ml10' v-if = 'index != 0 '>
                       <Button type="error" small @click="handleReqRemove(index)" icon="trash-a"></Button>
                     </Col>
-                     <!--弹窗!--> 
+                     <!--弹窗!-->
                     <Modal
                         v-model="form.madal"
                         :title="form.title"
@@ -69,27 +69,26 @@
                 <Row >
                   <Col span="20">
                      <Button  size="large" @click="handleReqAdd">增加</Button>
-                     <Button  size="large" @click='handleShow'>范例展示</Button>
                   </Col>
                 </Row>
-               
+
             <Row>
                   <Col span="20">
-                    <vue-json-editor v-model="editorContent" :showBtns="false"  @json-change="onJsonChange"></vue-json-editor>
+                    <vue-json-editor v-model="editorContent" :showBtns="true"  @json-save="onJsonChange"></vue-json-editor>
                   </Col>
-            </Row>  
-           
-            <!--编辑器!--> 
+            </Row>
+
+            <!--编辑器!-->
              </div>
              <div class="" v-show="pattern == 'jsonEdit' ">
                 <Row >
                   <Col span="20">
-                  <vue-json-editor v-model="editorContent" :showBtns="false" @json-change="onJsonChange"></vue-json-editor>
+                  <vue-json-editor v-model="editorContent" :showBtns="true" @json-save="onJsonChange"></vue-json-editor>
                   </Col>
                 </Row>
              </div>
           </Col>
-       </Row>         
+       </Row>
     </div>
 </template>
 
@@ -98,8 +97,9 @@ import types from '@/request/type'
 import isMust from '@/request/isMust'
 import reqList from '@/components/common/reqList'
 import vueJsonEditor from 'vue-json-editor'
+import { getPersonApiSave } from '@/server/personApi'
 export default {
-  props:['data'],
+  props:['data','json'],
   components: {
     reqList,
     vueJsonEditor
@@ -109,21 +109,22 @@ export default {
       pattern: 'edit',
       types:types,
       isMust:isMust,
-      editorContent:null,
+      editorContent:{},
       form:{
         madal : false,
         title : '',
-        data : ''
+        data : null
       },
     }
   },
   mounted(){
-    
+    this.json.length == 0 ? this.editorContent = {} : this.editorContent = this.json[0]
   },
   methods:{
-    onJsonChange (value) {
-        console.log('value:', value)
-      },
+     onJsonChange (data) {
+        this.json[0] = data
+        this.$emit('send',true);
+    },
     handleReqAdd(){
       this.data.push({
         key:'',
@@ -143,50 +144,52 @@ export default {
      * @return {[type]} [description]
      */
     handleShow(){
-      let res = this.reducer(this.data)
+      console.log(this.data)
+      //let res = this.reducer(this.data)
         this.editorContent = res
     },
-    reducer(data,parentKey = {}){
-      data.forEach((item)=>{
-          let target = item.key 
-          if(item.typeValue == 'Object' && target){
-            parentKey[target] = {}
-            if(item.value.length != 0) this.reducer(item.value,parentKey[target])
-          }
-          if(item.typeValue == 'String' && target){
-              parentKey[target] = item.value || ''
-          }
-      })
-      return parentKey
-   }, 
+   //  reducer(data,parentKey = {}){
+   //    data.forEach((item)=>{
+   //        let target = item.key
+   //        if(item.typeValue == 'Object' && target){
+   //          parentKey[target] = {}
+   //          if(item.value.length != 0) this.reducer(item.value,parentKey[target])
+   //        }
+   //        if(item.typeValue == 'String' && target){
+   //            parentKey[target] = item.value || ''
+   //        }
+   //    })
+   //    return parentKey
+   // },
     /**
-     * handleReq 打开弹窗 
+     * handleReq 打开弹窗
      */
     handleReq(index,item){
-        this.form.madal = true 
-        this.form.title = item.key 
-        if(item.value == null || {}){
+        this.form.madal = true
+        this.form.title = item.key
+        console.log(item.value,'======')
+        if(item.value.length == 0){
                 this.form.data = [{
-                key:'',
-                typeValue:"String",
-                content:'',
-                valueMust:"必须",
-                desc:'',
-                value:null,
-                modal:false,
+                  key:'',
+                  typeValue:"String",
+                  content:'',
+                  valueMust:"必须",
+                  desc:'',
+                  value:null,
+                  modal:false,
              }]
         }else{
             this.form.data = item.value
+            console.log(this.form.data,'f')
         }
     },
     handleChane(item){
-       if(item.typeValue == 'Number' || 'String' || 'Boolean')  item.value = '' 
+       if(item.typeValue == 'Number' || 'String' || 'Boolean')  item.value = ''
        if(item.typeValue == 'Object') item.value = []
     },
     ok (item) {
         item.value = this.form.data
-        console.log(item.value)
-        this.$Message.info('创建成功');
+        this.$Message.info('保存成功');
     },
     cancel () {
         this.form.madal = false

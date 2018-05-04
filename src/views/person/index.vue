@@ -8,10 +8,10 @@
               :title="init">
               <Form :model="formItem" :label-width="80" :rules="ruleValidate" ref="formValidate">
                 <FormItem label="项目名称" prop="projectName">
-                    <Input v-model="formItem.projectName" placeholder="请输入项目名称"></Input>
+                    <Input v-model="formItem.projectName" placeholder="请输入项目名称" :disabled='flag'></Input>
                 </FormItem>
-                <FormItem label="默认url">
-                    <Input v-model="formItem.url" placeholder="请输入url" disabled></Input>
+                <FormItem label="项目负责人">
+                    <Input v-model="formItem.userId" placeholder="项目负责人"></Input>
                 </FormItem>
                 <FormItem label="项目描述">
                     <Input v-model="formItem.desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder=""></Input>
@@ -62,21 +62,22 @@
 import {getPersonCreate, getPersonUpdate, getPersonList, getPersonDelect, getPersonModify} from '@/server/person'
 export default {
   data(){
-    let update =  async (rule, value, callback) => {
-        let res = await getPersonUpdate({ projectName : value })
-        res.code ? callback() : callback(new Error('项目名称已经存在'));
-      };
+    // let update = async (rule, value, callback) => {
+    //     let res = await getPersonUpdate({ projectName : value })
+    //     res.code ? callback() : callback(new Error('项目名称已经存在'));
+    //   };
     return{
       modal:false,
+      flag:false,
       init:'新建项目',
       formItem:{
         projectName: '',
-        url:'/api',
         desc: '',
+        userId: "",
         _id:''
       },
       ruleValidate:{
-        projectName: [{ required: true,  validator: update,  trigger: 'blur' }],
+        projectName: [{ required: true,  trigger: 'blur' }],
       },
       projectList:[]
     }
@@ -86,8 +87,7 @@ export default {
   },
   methods:{
     async getList(){
-      let res = await getPersonList() 
-      console.log(res)
+      let res = await getPersonList()
       res.code ? this.projectList = res.data : this.projectList = []
     },
 
@@ -127,6 +127,7 @@ export default {
       if (res.code) {
         this.modal = true
         this.init = '修改项目'
+        this.flag = false
         this.formItem.projectName = res.data.projectName
         this.formItem.desc = res.data.desc
         this.formItem._id = res.data._id
@@ -141,11 +142,11 @@ export default {
       this.init = '新建项目'
       if(this.formItem.projectName){
         this.$refs[name].validate(async (valid) => {
-             if (valid) {
-                 let res = await getPersonCreate(this.formItem)
-                 res.code ? this.modal = false : this.modal = true
-                 this.getList()
-             }
+           if (valid) {
+               let res = await getPersonCreate(this.formItem)
+               res.code ? this.modal = false : this.modal = true
+               this.getList()
+           }
         })
       }
     },

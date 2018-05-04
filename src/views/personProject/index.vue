@@ -40,7 +40,7 @@
             <FormItem label="默认url">
                 <Row>
                   <Col span="4">
-                      <Input v-model="formItem.url" placeholder="请输入url" disabled></Input>
+                      <Input v-model="formItem.url" placeholder="/api" disabled></Input>
                   </Col>
                   <Col span="19" offset="1">
                      <Input v-model="formItem.apiUrl" placeholder="请输入url"></Input>
@@ -49,7 +49,7 @@
 
             </FormItem>
             <FormItem label="选择目录">
-              <Select v-model="formItem.modelValue" style="width:200px">
+              <Select v-model="formItem.menuId" style="width:200px">
                   <Option v-for="(item, index) in projectAdress" :value="item.menuId" :key="index">{{ item.value }}</Option>
               </Select>
             </FormItem>
@@ -73,7 +73,7 @@
                         <span class="layout-text">{{item.value}}</span>
                     </template>
                     <!-- <MenuItem :name="index+'-'+ins" v-for = '(child,ins) in item.children' :key='ins'>{{child.apiName}}</MenuItem> -->
-                    <MenuItem :name="child._id" v-for = '(child,ins) in item.children' :key='ins'>{{child.apiName}}</MenuItem>
+                    <MenuItem :name="child.apiId" v-for = '(child,ins) in item.children' :key='ins'>{{child.apiName}}</MenuItem>
                    </Submenu>
                </Menu>
            </Col>
@@ -111,6 +111,7 @@ export default {
                spanRight: 19,
                modalMenu: false,
                modalApi: false,
+               flag:false,
                formDynamic: {
                    items:[]
                },
@@ -120,7 +121,7 @@ export default {
                  url:'/api',
                  desc: '',
                  apiUrl:'',
-                 modelValue: '',
+                 menuId: '',
                },
                ruleValidate:{
                  apiName: [{ required: true,  message: "不能为空",  trigger: 'blur' }],
@@ -129,15 +130,8 @@ export default {
                doc:''
            }
        },
-       async mounted(){
-          this.projectId = this.$route.params._id
-          let res = await getPersonProjectList({ projectId: this.projectId})
-          if(res.data._id){
-            this.formDynamic.items = res.data.items
-            let LastLength = res.data.items.length
-            this.menuId = res.data.items[LastLength -1].menuId
-          }
-
+       mounted(){
+          this.findMenu()
        },
        components:{
          Api
@@ -153,6 +147,15 @@ export default {
          },
        },
        methods: {
+           async findMenu(){
+             this.projectId = this.$route.params._id
+             let res = await getPersonProjectList({ projectId: this.projectId})
+             if(res.code){
+               this.formDynamic.items = res.data.items || []
+               let LastLength = res.data.items.length
+               this.menuId = res.data.items[LastLength -1].menuId
+             }
+           },
            toggleClick () {
                if (this.spanLeft === 5) {
                    this.spanLeft = 2;
@@ -169,7 +172,7 @@ export default {
                         let params = Object.assign(this.formDynamic,{ projectId })
                         let res = await getPersonProjectCreate(params)
                         if (res.code){
-                          this.formDynamic.items = res.data
+                          this.findMenu()
                           this.$Message.success('Success!');
                           this.modalMenu = false
                         }
@@ -210,7 +213,7 @@ export default {
                 this.modalMenu = true
                 let projectId = this.projectId
                 let res = await getPersonProjectList({ projectId })
-                if (res.data._id) {
+                if (res.code) {
                   this.formDynamic.items = res.data.items
                   let LastLength = res.data.items.length
                   this.menuId = res.data.items[LastLength -1].menuId
@@ -239,13 +242,11 @@ export default {
                       let params = Object.assign( this.formItem,{ projectId } )
                       let res = await getPersonProjectApi(params)
                       if(res.code){
-                        this.formDynamic.items = res.data
                         this.modalApi = false;
-                        //数据库生成ID
                         this.handleReset();
+                        this.findMenu()
                         this.$Message.success('Success!');
                       }
-
                   } else {
                       this.$Message.error('Fail!');
                   }
@@ -260,6 +261,7 @@ export default {
                   projectId:this.projectId,
                   apiId:apiId
                 })
+
                 this.$router.push({path:`/personProject/${obj.projectId}/add/${obj.apiId}`})
 
             }

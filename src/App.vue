@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="main">
     <MockHead/>
-    <router-view/>
+       <router-view/>
     <MockFooter/>
   </div>
 </template>

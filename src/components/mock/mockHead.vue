@@ -9,7 +9,7 @@
             </MenuItem>
             <MenuItem name="2">
                 <Icon type="ios-navigate"></Icon>
-                <router-link :to="{ path: '/', params: {} }">团队项目<span></span></router-link>
+                <router-link :to="{ path: '/work', params: {} }">工作台<span></span></router-link>
             </MenuItem>
             <!-- <MenuItem name="3">
                 <Icon type="ios-keypad"></Icon>

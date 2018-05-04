@@ -20,8 +20,8 @@ export default new Router({
          },
       ]
     },
-    { path:'/group',component:resolve => require(['../views/group'], resolve) },
     { path:'/work',component:resolve => require(['../views/work'], resolve) },
+    { path:'/progress',component:resolve => require(['../views/progress'], resolve) },
     { path:'/doc',component:resolve => require(['../views/doc'], resolve) },
     { path:'/help', component:resolve => require(['../views/help'], resolve)},
   ]

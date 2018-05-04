@@ -1,14 +1,17 @@
 <template lang="html">
   <div class="">
-     <Tabs v-if='doc'>
+     <Tabs v-if='flag'>
         <TabPane label="api信息" icon="social-apple">
              <apiList :doc='doc'></apiList>
+             <div @click="handleClick()">
+                保存
+             </div>
         </TabPane>
         <TabPane label="请求参数" icon="social-windows">
-           <request :data='doc.request'></request>
+           <request :data='doc.request' :json='doc.requestJson' @send='send'></request>
         </TabPane>
         <TabPane label="响应结果" icon="social-tux">
-           <request :doc='doc.response'></request>
+           <request :data='doc.response' :json='doc.responseJson' @send='send'></request>
         </TabPane>
     </Tabs>
 
@@ -18,11 +21,12 @@
 <script>
 import apiList from './apiList'
 import request from './request'
-import { getPersonApiList } from '@/server/personApi'
+import { getPersonApiList,getPersonApiSave } from '@/server/personApi'
 export default {
   data(){
     return{
-      doc:null
+      doc:null,
+      flag:false
     }
   },
   components:{
@@ -37,13 +41,25 @@ export default {
   },
   methods:{
     async fetchDate(){
-      let obj = new Object({
+      this.flag = false
+       let obj = Object.assign({
         projectId:this.$route.params._id,
-        apiId: this.$route.params._apiId
-      })
+        _id: this.$route.params._apiId
+      },this.obj)
       let res = await getPersonApiList(obj)
       if (res.code) {
         this.doc = res.data
+        this.flag = true
+      }
+    },
+    send(data){
+      if(data) this.handleClick()
+    },
+    async handleClick(){
+      let data = Object.assign(this.doc,{_id:this.$route.params._apiId})
+      let res = await getPersonApiSave(this.doc)
+      if(res.code){
+        this.$Message.info('保存成功');
       }
     }
   }

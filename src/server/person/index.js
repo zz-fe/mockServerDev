@@ -10,11 +10,11 @@ export const getPersonCreate = ( obj = {} ) => {
 };
 
 /**
- * [getPersonList 项目名称重复]
+ * [getPersonUpdate 项目名称重复]
  * @return {[type]} [description]
  */
 export const getPersonUpdate = ( obj = {} ) => {
-  return axios.post(`/person/update`, obj)
+  return axios.post(`/person/updateName`, obj)
 }
 
 /**
@@ -22,7 +22,7 @@ export const getPersonUpdate = ( obj = {} ) => {
  * @return {[type]} [description]
  */
 export const getPersonList = () => {
-  return axios.get(`/person/List`)
+  return axios.get(`/person/list`)
 }
 
 /**

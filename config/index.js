@@ -35,7 +35,8 @@ module.exports = {
       '/api':'http://localhost:3000',
       '/person':'http://localhost:3000',
       '/personProject':'http://localhost:3000',
-      '/personApi':'http://localhost:3000'
+      '/personApi':'http://localhost:3000',
+      '/work':'http://localhost:3000'
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
     // with this option, according to the CSS-Loader README
